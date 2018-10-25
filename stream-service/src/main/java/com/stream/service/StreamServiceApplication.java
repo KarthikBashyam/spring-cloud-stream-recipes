@@ -20,6 +20,7 @@ public class StreamServiceApplication {
 	CommandLineRunner startup() {
 		return args -> {
 			System.out.println("========= CLOUD STREAM APPLICATION STARTED ============");
+			
 		};
 
 	}
