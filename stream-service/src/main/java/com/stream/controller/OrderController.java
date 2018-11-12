@@ -1,7 +1,14 @@
 package com.stream.controller;
 
-import javax.activation.MimeType;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.state.KeyValueIterator;
+import org.apache.kafka.streams.state.QueryableStoreTypes;
+import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.stream.binder.kafka.streams.QueryableStoreRegistry;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.integration.support.MessageBuilder;
@@ -18,6 +25,9 @@ public class OrderController {
 
 	private OrderChannelConfig streamsConfig;
 
+	@Autowired
+	private QueryableStoreRegistry queryableStoreRegistry;
+
 	public OrderController(OrderChannelConfig streamsConfig) {
 		this.streamsConfig = streamsConfig;
 	}
@@ -30,6 +40,23 @@ public class OrderController {
 				.setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON).build());
 		System.out.println("Message Sent : " + messageSent);
 		return new ResponseEntity<String>("Order Created", HttpStatus.OK);
+	}
+
+	@GetMapping(path = "/keystore")
+	public String kafkaKeyStore() {
+		
+		ReadOnlyKeyValueStore<String, Long> messageCount = queryableStoreRegistry.getQueryableStoreType("message-count",
+				QueryableStoreTypes.keyValueStore());
+		
+		KeyValueIterator<String, Long> messages = messageCount.all();
+
+		Map<String, Long> values = new HashMap<>();
+		while (messages.hasNext()) {
+			KeyValue<String, Long> message = messages.next();
+			values.put(message.key, message.value);
+		}
+		
+		return values.toString();
 	}
 
 }
