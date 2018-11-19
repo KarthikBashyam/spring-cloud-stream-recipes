@@ -8,7 +8,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 
 import com.stream.dto.Product;
-import com.stream.dto.ProductSales;
 
 /**
  * Kafka Binding
@@ -21,8 +20,9 @@ public interface OrderChannelConfig {
 	String OUTPUT = "sout";
 	String KAFKA_INPUT = "kin";
 	String KAFKA_OUTPUT = "kout";
-	String PRODUCT_INPUT = "product";
-	String PRODUCT_SALES_INPUT = "product-sales";
+	String PRODUCT_INPUT = "products";
+	String PRODUCT_SALES_INPUT = "products-sales";
+	String PRODUCT_OUTPUT = "products-out";
 
 	// consumer
 	@Input(INPUT)
@@ -37,10 +37,13 @@ public interface OrderChannelConfig {
 
 	@Input(KAFKA_OUTPUT)
 	KTable<String, String> kafkaStreamsOutput();
-	
+
 	@Input(PRODUCT_INPUT)
-	KStream<String,Product> productStreamInput();
-	
-	@Input(PRODUCT_SALES_INPUT)
-	KStream<String,ProductSales> productSalesStreamInput();
+	KStream<String, Product> productStreamInput();
+
+	@Output(PRODUCT_OUTPUT) // producer
+	MessageChannel productStreamOutput();
+
+	//@Input(PRODUCT_SALES_INPUT)
+	//KStream<String, ProductSales> productSalesStreamInput();
 }

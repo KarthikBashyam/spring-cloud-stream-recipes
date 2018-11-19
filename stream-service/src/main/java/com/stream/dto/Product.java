@@ -6,6 +6,16 @@ public class Product {
 
 	private String name;
 
+	public Product() {
+		super();
+	}
+
+	public Product(String code, String name) {
+		super();
+		this.code = code;
+		this.name = name;
+	}
+
 	public String getCode() {
 		return code;
 	}

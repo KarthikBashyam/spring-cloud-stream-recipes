@@ -8,6 +8,8 @@ import org.apache.kafka.streams.kstream.Materialized;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.stereotype.Component;
 
+import com.stream.dto.Product;
+
 /**
  * 
  * @author Karthik
@@ -16,7 +18,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class EventListener {
 
-	private Log LOGGER = LogFactory.getLog(EventListener.class);
+	private static final Log LOGGER = LogFactory.getLog(EventListener.class);
 
 	@StreamListener(OrderChannelConfig.INPUT)
 	public void writeEvent(String event) {
@@ -31,6 +33,12 @@ public class EventListener {
 		KTable<String, Long> messageCountTable = stream.groupByKey().count(Materialized.as("message-count"));
 		messageCountTable.toStream().foreach((key, value) -> System.out.println(key + ":" + value));
 
+	}
+
+	@StreamListener(OrderChannelConfig.PRODUCT_INPUT)
+	public void productStreamProcess(KStream<String, Product> productStream) {
+		LOGGER.info("================= PRODUCT STREAMS LISTENER ===============");
+		productStream.foreach((key, value) -> System.out.println(value.getName()));
 	}
 
 }
