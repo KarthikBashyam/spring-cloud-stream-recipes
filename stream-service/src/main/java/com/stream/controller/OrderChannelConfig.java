@@ -21,8 +21,9 @@ public interface OrderChannelConfig {
 	String KAFKA_INPUT = "kin";
 	String KAFKA_OUTPUT = "kout";
 	String PRODUCT_INPUT = "products";
-	String PRODUCT_SALES_INPUT = "products-sales";
 	String PRODUCT_OUTPUT = "products-out";
+	String PRODUCT_SALES_INPUT = "products-sales";
+	String PRODUCT_SALES_OUTPUT = "products-sales-out";
 
 	// consumer
 	@Input(INPUT)
@@ -32,18 +33,26 @@ public interface OrderChannelConfig {
 	@Output(OUTPUT)
 	MessageChannel streamsOutput();
 
+	// Stream
 	@Input(KAFKA_INPUT)
 	KStream<String, String> kafkaStreamsInput();
 
 	@Input(KAFKA_OUTPUT)
 	KTable<String, String> kafkaStreamsOutput();
 
+	// Stream
 	@Input(PRODUCT_INPUT)
 	KStream<String, Product> productStreamInput();
 
-	@Output(PRODUCT_OUTPUT) // producer
+	// producer
+	@Output(PRODUCT_OUTPUT)
 	MessageChannel productStreamOutput();
 
-	//@Input(PRODUCT_SALES_INPUT)
-	//KStream<String, ProductSales> productSalesStreamInput();
+	// Stream
+	@Input(PRODUCT_SALES_INPUT)
+	KStream<String, Product> productSalesStreamInput();
+
+	// producer
+	@Output(PRODUCT_SALES_OUTPUT)
+	MessageChannel productSalesStreamOutput();
 }

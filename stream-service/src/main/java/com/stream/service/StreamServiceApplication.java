@@ -15,10 +15,9 @@ import org.springframework.integration.support.MessageBuilder;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.MessageChannel;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stream.controller.OrderChannelConfig;
 import com.stream.dto.Product;
+import com.stream.dto.ProductSales;
 
 @SpringBootApplication(scanBasePackages = "com.stream.*")
 @EnableBinding(OrderChannelConfig.class)
@@ -57,23 +56,37 @@ public class StreamServiceApplication {
 		return args -> {
 
 			Runnable runnable = () -> {
+			
+			MessageChannel channel = config.productStreamOutput();
+			Product product = new Product("IPHONE", "Apple IPhone");
 
-				MessageChannel channel = config.productStreamOutput();
-				Product product = new Product("IPHONE", "Apple IPhone");
-				ObjectMapper mapper = new ObjectMapper();
-				String payload;
-				try {
-					payload = mapper.writeValueAsString(product);
+			channel.send(MessageBuilder.withPayload(product).setHeader(KafkaHeaders.MESSAGE_KEY, "IPHONE".getBytes())
+					.build());
+			LOGGER.info("Message sent to Product Topic!!");
+			};
+			Executors.newScheduledThreadPool(1).scheduleAtFixedRate(runnable, 1, 1, TimeUnit.SECONDS);
 
-					channel.send(MessageBuilder.withPayload(payload)
-							.setHeader(KafkaHeaders.MESSAGE_KEY, "IPHONE".getBytes()).build());
-					LOGGER.info("Message sent to Product Topic!!");
-				} catch (JsonProcessingException e) {
-					LOGGER.error("Failed to send message : " + e.getMessage());
-				}
+		};
+	}
+
+	@Bean
+	@ConditionalOnProperty(name = "stream.topic", havingValue = "products")
+	CommandLineRunner sendProductSalesMessages(OrderChannelConfig config) {
+
+		return args -> {
+
+			Runnable runnable = () -> {
+
+				MessageChannel channel = config.productSalesStreamOutput();
+				ProductSales productSales = new ProductSales("Walmart", "IPHONE", 150L);
+
+				channel.send(MessageBuilder.withPayload(productSales)
+						.setHeader(KafkaHeaders.MESSAGE_KEY, "IPHONE".getBytes()).build());
+				LOGGER.info("Message sent to Product Sales Topic!!");
 			};
 
-			Executors.newScheduledThreadPool(1).schedule(runnable, 10, TimeUnit.SECONDS);
+			Executors.newScheduledThreadPool(1).scheduleAtFixedRate(runnable, 1, 1, TimeUnit.SECONDS);
+
 		};
 	}
 
